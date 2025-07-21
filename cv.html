@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CV Builder - Daniel Pule</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .form-container, .cv-container {
+      max-width: 800px;
+      margin: 20px auto;
+      background-color: #fff;
+      padding: 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1, h2 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 32px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      color: #3498db;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .skills span {
+      display: inline-block;
+      background-color: #3498db;
+      color: white;
+      padding: 5px 10px;
+      margin: 5px 5px 0 0;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .submit-btn {
+      margin-top: 20px;
+      background-color: #3498db;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .submit-btn:hover {
+      background-color: #2980b9;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="form-container">
+    <h1>Enter Your CV Details</h1>
+    <form id="cvForm">
+      <label>Full Name</label>
+      <input type="text" id="name" required />
+
+      <label>Email</label>
+      <input type="email" id="email" required />
+
+      <label>Phone</label>
+      <input type="text" id="phone" required />
+
+      <label>Location</label>
+      <input type="text" id="location" required />
+
+      <label>LinkedIn URL</label>
+      <input type="url" id="linkedin" />
+
+      <label>GitHub URL</label>
+      <input type="url" id="github" />
+
+      <label>Professional Summary</label>
+      <textarea id="summary" rows="3" required></textarea>
+
+      <label>Technical Skills (comma-separated)</label>
+      <input type="text" id="skills" required />
+
+      <label>Soft Skills (comma-separated)</label>
+      <input type="text" id="softSkills" required />
+
+      <label>Certifications & Awards (one per line)</label>
+      <textarea id="certs" rows="3"></textarea>
+
+      <label>Projects (one per line)</label>
+      <textarea id="projects" rows="3"></textarea>
+
+      <label>Hobbies & Interests (one per line)</label>
+      <textarea id="hobbies" rows="3"></textarea>
+
+      <label>Languages (one per line)</label>
+      <textarea id="languages" rows="2"></textarea>
+
+      <label>References</label>
+      <textarea id="references" rows="2"></textarea>
+
+      <button type="submit" class="submit-btn">Generate CV</button>
+    </form>
+  </div>
+
+  <div class="cv-container" id="cvOutput" style="display:none;"></div>
+  <button id="pdfBtn" class="submit-btn" style="display:none;">Download PDF</button>
+
+  <script>
+    document.getElementById('cvForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const getValue = id => document.getElementById(id).value.trim();
+
+      const skills = getValue('skills').split(',').map(skill => `<span>${skill.trim()}</span>`).join('');
+      const softSkills = getValue('softSkills').split(',').map(skill => `<li>${skill.trim()}</li>`).join('');
+      const certs = getValue('certs').split('\n').map(cert => `<li>${cert.trim()}</li>`).join('');
+      const projects = getValue('projects').split('\n').map(proj => `<li>${proj.trim()}</li>`).join('');
+      const hobbies = getValue('hobbies').split('\n').map(hobby => `<li>${hobby.trim()}</li>`).join('');
+      const languages = getValue('languages').split('\n').map(lang => `<li>${lang.trim()}</li>`).join('');
+      const references = getValue('references').split('\n').map(ref => `<li>${ref.trim()}</li>`).join('');
+
+      const cvHTML = `
+        <h1>${getValue('name')}</h1>
+        <div class="section">
+          <p><strong>Email:</strong> ${getValue('email')}</p>
+          <p><strong>Phone:</strong> ${getValue('phone')}</p>
+          <p><strong>Location:</strong> ${getValue('location')}</p>
+          ${getValue('linkedin') ? `<p><strong>LinkedIn:</strong> <a href="${getValue('linkedin')}" target="_blank">${getValue('linkedin')}</a></p>` : ''}
+          ${getValue('github') ? `<p><strong>GitHub:</strong> <a href="${getValue('github')}" target="_blank">${getValue('github')}</a></p>` : ''}
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Professional Summary</h2>
+          <p>${getValue('summary')}</p>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Technical Skills</h2>
+          <div class="skills">${skills}</div>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Soft Skills</h2>
+          <ul>${softSkills}</ul>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Certifications & Awards</h2>
+          <ul>${certs}</ul>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Projects</h2>
+          <ul>${projects}</ul>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Hobbies & Interests</h2>
+          <ul>${hobbies}</ul>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">Languages</h2>
+          <ul>${languages}</ul>
+        </div>
+
+        <div class="section">
+          <h2 class="section-title">References</h2>
+          <ul>${references}</ul>
+        </div>
+      `;
+
+      cvOutput.innerHTML = cvHTML;
+cvOutput.style.display = 'block';
+
+// Show PDF button only
+document.getElementById('pdfBtn').style.display = 'inline-block';
+
+// PDF download
+document.getElementById('pdfBtn').onclick = function() {
+  const element = document.getElementById('cvOutput');
+  const opt = {
+    margin: 0.5,
+    filename: `${getValue('name').replace(/\s+/g, '_')}_CV.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+
+  // Wait for rendering before generating PDF
+  setTimeout(() => {
+    html2pdf().set(opt).from(element).save();
+  }, 100); // 100ms delay
+};
+    });
+  </script>
+</body>
+</html>
